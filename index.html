@@ -1,0 +1,315 @@
+<html>
+
+<head>
+  <title>Immersive Stream for XR Link Generator</title>
+  <style>
+    body {
+      background-color: #f6f6f6;
+      font-family: "Verdana";
+      margin: 30px;
+    }
+    h1 {
+      color: #1a73e8;
+      font-size: x-large;
+    }
+    h2 {
+      color: #1a73e8;
+      font-size: 12pt;
+    }
+    a {
+      font-size: 10pt;
+    }
+    a:link, a:visited {
+      background-color: #1a73e8;
+      color: white;
+      padding: 14px 25px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 10px;
+      margin: 5px;
+    }
+    a:hover, a:active {
+      background-color: #4285f4;
+    }
+    ul {
+      list-style: none;
+    }
+    li {
+      margin-bottom: 30px;
+    }
+    img{
+      width: 100%;
+    }
+    span{
+      color: 0072F0;
+    }
+    .extraButton {
+      background-color: #0d652d !important;
+    }
+    .text {
+      text-align: justify;
+      padding: 10px;
+      color: #363636;
+    }
+    .buttons {
+      padding-top: 10px;
+      margin-left: 5px;
+    }
+    .input {
+      padding: 10px;
+      color: #888888;
+    }
+    .error {
+      padding: 10px;
+      color: #EEEEEE;
+      background-color: #996060;
+    }
+    .inputSection {
+      width: 80%;
+    }
+    .inputField{
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .note{
+      background-color: #fce5cd;
+      color: #e69138;
+      padding: 10px;
+      margin: 10px;
+      font-size: smaller;
+    }
+    #qr{
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .qr_header{
+      margin-left: 21%;
+      margin-bottom: 25px;
+      width: 60%;
+    }
+    .qr_title{
+      color: 0072F0;
+      font-size: xx-large;
+      margin-bottom: 5px;
+    }
+    .qr_text{
+      color: 606367;
+      font-size: smaller;
+    }
+    .qrcontainer{
+      margin: auto;
+      margin-top: 20px;
+      background-color: white;
+      padding: 10;
+      width: 55%;
+      border-radius: 25px;
+      border: 1px solid #A8A8A8;
+      text-align: center;
+      box-shadow: brown;
+      box-shadow: 0px 2px 5px 0px #d1d1d1;
+    }
+    .qr_subtext{
+      color: 606367;
+      font-size: medium;
+      margin: 25;
+      margin-top: 0px;
+    }
+  </style>
+</head>
+<body>
+  <div id="link-generator">
+    <h1>Immersive Stream for XR Link Generator</h1>
+    <p class="text">Please enter the information for your project (endpoint URL and API key) as well as the cloud AR Asset ID you want to use. <br>
+      You can then press the button for your respective platform below to start the experience.</p>
+    <div class="inputSection">
+      <div class="input">Endpoint URL <input type="text" id="streaming_service_address" placeholder="ADDRESS.streamplease.net" class="inputField"><br></div>
+      <div class="error" id="endpoint-invalid">Invalid Endpoint URL. URL must have the format of "ADDRESS.streamplease.net"<br></div>
+      <div class="input">API Key <input type="text" id="streaming_api_key" placeholder="Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" class="inputField"><br></div>
+      <div class="input">Cloud AR Asset ID <input type="text" id="cloud_ar_asset_id" placeholder="default" value="Content_Start" class="inputField"><br></div>
+      <div class="note" id="note">
+        <b>Note:</b> Please provide both the endopint URL and the API key to generate valid redirect links.
+        The endpoint URL and API key can be found via the API when describing an instance.
+        You can also right click and copy the link to create your own redirect page.
+      </div>
+    </div>
+    <div id="links" class="buttons"></div>
+  </div>
+
+  <div id="qr">
+    <div class="qr_header">
+      <h1 class="qr_title">QR Code</h1>
+      <p class="qr_text">The link you are trying to reach only works on mobile devices.</p>
+    </div>
+    <div class="qrcontainer">
+      <div id="qrcode">
+      </div>
+      <p class="qr_subtext"> <span> Please scan this QR Code </span> link with your mobile device to proceed to the experience.</p>
+    </div>
+  </div>
+
+<script type="text/javascript">
+// Create links for various entry points per platform into Immersive Stream for XR
+const createLinks = {
+  getWebTemplate: () => {
+    return 'https://arvr.google.com/streaming/homeview?scene_uri=https%3A%2F%2Farvr.google.com%2Fscene-viewer%2F1.2%3Ffile%3Dtest-file%26cloudArAssetId%3DCLOUD_AR_ASSET_ID1&streaming_session_address=STREAMING_ADDRESS1&streaming_session_key=STREAMING_KEY1&camera_controls=false&hide_install=true';
+  },
+  getQRTemplate: () => {
+    // Ideally, we should host this QR creator on our webclient, which would give us an arvr.google.com domain.
+    return 'https://www.gstatic.com/ar/core/viewer/carousel/cloud9/tools/link_generator.html?streaming_service_address=STREAMING_ADDRESS1&streaming_api_key=STREAMING_KEY1&cloud_ar_asset_id=CLOUD_AR_ASSET_ID1';
+  },
+  getAndroidTemplate: () => {
+    return 'https://search.app.goo.gl/?apn=com.google.android.googlequicksearchbox&link=https%3A%2F%2Farvr.google.com%2Fscene-viewer%2F1.2%3Ffile%3Dhttp%253A%252F%252Fwww.gstatic.com%252Far%252Fcore%252Fviewer%252Fcarousel%252Fcloud9%252Fstaging%252Fc9_error.glb%26referrer%3Dgoogle.com%253AIE%253Apoc%26cloudArAssetId%3DCLOUD_AR_ASSET_ID2%26streaming_api_key%3DSTREAMING_KEY2%26streaming_service_address%3DSTREAMING_ADDRESS2%26streaming_test_dryrun%3Dtrue%26card_content%3Dhttps%253A%252F%252Fwww.gstatic.com%252Far%252Fcore%252Fviewer%252Fcarousel%252Fcloud9%252Fim_edge.html%26enable_server_touch_handle%3Dtrue&afl=WEBLINK1&amv=301190293';
+  },
+  getiOSTemplate: () => {
+    return 'https://search.app.goo.gl/?ius=googleapp&ibi=com.google.GoogleMobile&efr=1&imv=123&link=https%3A%2F%2Farvr.google.com%2Fscene-viewer%3Freferrer%3Dgoogle.com%253AIE%253Apoc%26cloudArAssetId%3DCLOUD_AR_ASSET_ID2%26streaming_api_key%3DSTREAMING_KEY2%26streaming_service_address%3DSTREAMING_ADDRESS2%26streaming_test_dryrun%3Dtrue%26card_content%3Dhttps%253A%252F%252Fwww.gstatic.com%252Far%252Fcore%252Fviewer%252Fcarousel%252Fcloud9%252Fim_edge.html%26enable_server_touch_handle%3Dtrue&ifl=WEBLINK1';
+  },
+  getCrossPlatformTemplate: () => {
+    return 'https://search.app.goo.gl?apn=com.google.android.googlequicksearchbox&link=https%3A%2F%2Farvr.google.com%2Fscene-viewer%2F1.2%3Ffile%3Dhttp%253A%252F%252Fwww.gstatic.com%252Far%252Fcore%252Fviewer%252Fcarousel%252Fcloud9%252Fstaging%252Fc9_error.glb%26referrer%3Dgoogle.com%253AIE%253Apoc%26cloudArAssetId%3DCLOUD_AR_ASSET_ID2%26streaming_api_key%3DSTREAMING_KEY2%26streaming_service_address%3DSTREAMING_ADDRESS2%26streaming_test_dryrun%3DSTREAMING_TEST_DRYRUN2%26card_content%3Dhttps%253A%252F%252Fwww.gstatic.com%252Far%252Fcore%252Fviewer%252Fcarousel%252Fcloud9%252Fim_edge.html%26enable_server_touch_handle%3Dtrue&ius=googleapp&ibi=com.google.GoogleMobile&efr=1&ifl=WEBLINK1&ofl=QRCODELINK1&amv=MINIMUM_AGA_VERSION1&imv=MINIMUM_IGA_VERSION1';
+  },
+  createLinkFromTemplate: (template, parameters) => {
+    let returnIntentLink = template;
+
+    let encodedParameters = JSON.parse(JSON.stringify(parameters));
+    for (let i = 0; i < 6; i += 1) {
+      for (parameterName in encodedParameters) {
+        returnIntentLink = returnIntentLink.replaceAll(
+            parameterName + i, encodedParameters[parameterName]);
+
+        encodedParameters[parameterName] =
+            encodeURIComponent(encodedParameters[parameterName]);
+      }
+    }
+    return returnIntentLink;
+  },
+  get: (parameters) => {
+    const templateParameters = {
+      STREAMING_ADDRESS: parameters.streaming_service_address,
+      STREAMING_KEY: parameters.streaming_api_key,
+      CLOUD_AR_ASSET_ID: parameters.cloud_ar_asset_id,
+      WEBLINK: '',
+      STREAMING_TEST_DRYRUN: 'true',
+      MINIMUM_AGA_VERSION: '301190293',
+      MINIMUM_IGA_VERSION: '206',
+    };
+    templateParameters['WEBLINK'] = createLinks.createLinkFromTemplate(
+        createLinks.getWebTemplate(), templateParameters);
+    templateParameters['QRCODELINK'] = createLinks.createLinkFromTemplate(
+        createLinks.getQRTemplate(), templateParameters);
+    return {
+      web: templateParameters['WEBLINK'],
+      qr: templateParameters['QRCODELINK'],
+      android: createLinks.createLinkFromTemplate(
+          createLinks.getAndroidTemplate(), templateParameters),
+      iOS: createLinks.createLinkFromTemplate(
+          createLinks.getiOSTemplate(), templateParameters),
+      crossPlatform: createLinks.createLinkFromTemplate(
+          createLinks.getCrossPlatformTemplate(), templateParameters),
+    };
+  }
+};
+</script>
+
+<script type="text/javascript">
+// Create HTML for FDL and web client link
+const createLinkHTML = (() => {
+  let prevHtml = '';
+  return () => {
+    const queryParameters = {
+      streaming_service_address: document.getElementById('streaming_service_address').value,
+      streaming_api_key: document.getElementById('streaming_api_key').value,
+      cloud_ar_asset_id: document.getElementById('cloud_ar_asset_id').value
+    };
+
+    const hasValidAddress = !queryParameters.streaming_service_address || queryParameters.streaming_service_address.match(/^[^\.]*\.streamplease\.net$/);
+    queryParameters.streaming_service_address += ":443";
+
+    const hasValidParams = hasValidAddress && queryParameters.streaming_service_address && queryParameters.streaming_api_key;
+
+    const redirectLinks = createLinks.get(queryParameters);
+
+    const newHtml = `<h2>Links</h2>
+                     <p>Use this link to test the experience on all platforms:</p>
+                     <a href="${redirectLinks.crossPlatform}">Cross-Platform Redirect Link</a><br>
+                     <p>Use these links to set up your own dynamic redirect page or test on Desktop:</p>
+                     <a href="${redirectLinks.android}" class="extraButton">Android</a>
+                     <a href="${redirectLinks.iOS}" class="extraButton">iOS</a>
+                     <a href="${redirectLinks.web}" class="extraButton" target="_blank">Web (Experimental)</a>`;
+
+    document.getElementById("note").style.display  = hasValidParams ? "none"  : "block";
+    document.getElementById("links").style.display = hasValidParams ? "block" : "none";
+    document.getElementById("endpoint-invalid").style.display = hasValidAddress ? "none" : "block";
+
+    if(prevHtml !== newHtml) {
+      document.getElementById("links").innerHTML = newHtml;
+      prevHtml = newHtml;
+    }
+  };
+})();
+
+// Parse URL query parameters
+const queryParameters = {
+  getParameterByName: (nameInput, defaultValue) => {
+    const name = nameInput.replace(/[\[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(window.location.href);
+    if (!results) return defaultValue;
+    if (!results[2]) return defaultValue;
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  },
+  get: () => {
+    return {
+      streaming_service_address:
+          queryParameters.getParameterByName('streaming_service_address', ''),
+      streaming_api_key:
+          queryParameters.getParameterByName('streaming_api_key', ''),
+      cloud_ar_asset_id:
+          queryParameters.getParameterByName('cloud_ar_asset_id', 'Content_Start'),
+      edit_mode: queryParameters.getParameterByName('edit_mode', 'false'),
+    };
+  },
+  isValid: (params) => {
+     return params.streaming_service_address.length && params.streaming_api_key.length;
+  }
+};
+
+// Create QR code via Google Charts for custom URL
+const createQRCode = (url) => {
+  // Request QR code image
+  const qrImg = document.createElement('img');
+  qrImg.src =
+      'https://chart.googleapis.com/chart?chs=512x512&cht=qr&choe=UTF-8&chld=L&chl=' +
+      encodeURIComponent(url);
+
+  document.getElementById('qrcode').appendChild(qrImg);
+};
+
+const queryParams = queryParameters.get();
+document.getElementById('streaming_service_address').value = queryParams.streaming_service_address.split(":")[0];
+document.getElementById('streaming_api_key').value = queryParams.streaming_api_key;
+document.getElementById('cloud_ar_asset_id').value = queryParams.cloud_ar_asset_id;
+
+document.getElementById("qr").style.display = "none";
+document.getElementById("link-generator").style.display = "none";
+
+const isValidParams = queryParameters.isValid(queryParams);
+if(isValidParams) {
+  createQRCode(createLinks.get(queryParams).crossPlatform);
+  document.getElementById("qr").style.display = "block";
+}
+
+if(!isValidParams || queryParams.edit_mode === "true"){
+  window.setInterval(createLinkHTML, 100);
+  document.getElementById("link-generator").style.display = "block";
+}
+</script>
+
+</body>
+</html>
